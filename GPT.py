@@ -4,6 +4,8 @@ import serial
 import threading
 import time
 
+#trying the git push 
+
 # Function to read from a serial port
 def read_from_serial(ser, textbox):
     while True:
