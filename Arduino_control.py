@@ -1,31 +1,32 @@
-import serial.tools.list_ports
+import tkinter as tk
+import serial
+import time
 
-ports=serial.tools.list_ports.comports()
-
-SerialInst= serial.Serial()
-
-portslist=[]
-
-for element in ports:
-    portslist.append(str(element))
-    print(element)
+# Configure the serial port to which the Arduino is connected
+arduino = serial.Serial('COM6', 9600)  # Change 'COM3' to your Arduino port
+time.sleep(2)  # Give some time for the connection to be established
 
 
-com = input("Select COM port for the Arduino: ")
+def toggle_relay():
+    global relay_state
+    if relay_state:
+        arduino.write(b'0')  # Send '0' to turn relay off
+        button.config(text="ON",bg='green', fg='white')
+    else:
+        arduino.write(b'1')  # Send '1' to turn relay on
+        button.config(text="OFF",bg='red', fg='white')
+    relay_state = not relay_state
 
-for i in range(len(portslist)):
-    if portslist[i].startswith("COM" +str(com)):
-        use = "COM" + str(com)
-        print(use)
-        
+# Create the main window
+root = tk.Tk()
+root.title("Arduino Relay Control")
 
-SerialInst.baudrate = 9600
-SerialInst.port = use
-SerialInst.open()
+# Initial state of the relay
+relay_state = False
 
-while True:
-    command= input("Command: ")
-    SerialInst.write(command.encode('utf-8'))
+# Create a button to toggle the relay
+button = tk.Button(root, text="Turn Relay On", command=toggle_relay, width=25, height=5)
+button.pack(pady=20)
 
-    if command == 'exit':
-        quit()
+# Start the Tkinter event loop
+root.mainloop()
