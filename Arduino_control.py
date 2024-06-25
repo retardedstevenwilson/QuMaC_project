@@ -9,17 +9,16 @@ time.sleep(2)  # Give some time for the connection to be established
 relay_states = {2: False, 3: False, 4: False,5: False}
 
 
-
 def toggle_relay(button, relay_no):
     global relay_states
     global arduino
     state = relay_states[relay_no]
     if state:
         arduino.write(f'{relay_no}.0\n'.encode('utf-8'))  # Send '0' to turn relay off
-        button.config(text="ON", bg='green', fg='white')
+        button.config(text="Relay {relay_no}: ON", bg='green', fg='white')
     else:
         arduino.write(f'{relay_no}.1\n'.encode('utf-8'))  # Send '1' to turn relay on
-        button.config(text="OFF", bg='red', fg='white')
+        button.config(text="Relay {relay_no}: OFF", bg='red', fg='white')
     relay_states[relay_no] = not state
 
 # Create the main window
