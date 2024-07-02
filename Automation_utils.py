@@ -39,16 +39,37 @@ def toggle_relay(button, relay_no):
     global relay_states
     state = relay_states[relay_no]
     if state:
-        arduino.write(f'{relay_no}.0\n'.encode('utf-8'))  # Send '0' to turn relay off
-        button.config(text=f"Relay {relay_no}: ON", bg='green', fg='white',font="Helvetica",width=15, height=5)
+        arduino.write(f'1:{relay_no}:0\n'.encode('utf-8'))  # Send '0' to turn relay off
+        button.config(text=f"Relay {relay_no}: ON", bg='green', fg='white',width=15, height=5)
+        print("Relay {}: ON".format(relay_no))
         time.sleep(0.1) 
     else:
-        arduino.write(f'{relay_no}.1\n'.encode('utf-8'))  # Send '1' to turn relay on
-        button.config(text=f"Relay {relay_no}: OFF", bg='red', fg='white', font="Helvetica",width=15, height=5)
+        arduino.write(f'1:{relay_no}:1\n'.encode('utf-8'))  # Send '1' to turn relay on
+        button.config(text=f"Relay {relay_no}: OFF", bg='red', fg='white',width=15, height=5)
+        print("Relay {}: OFF".format(relay_no))
         time.sleep(0.1) 
     relay_states[relay_no] = not state
     
+def timetoggle_relay(button, relay_no,duration):
+    # Function code = 2
+    global arduino
+    global relay_states
+    state = relay_states[relay_no]
+    if state:
+        arduino.write(f'2:{relay_no}:{duration}\n'.encode('utf-8'))  # Send '0' to turn relay off
+        button.config(text=f"Relay {relay_no}: ON", bg='green', fg='white',width=15, height=5)
+        time.sleep(0.1)
+        button.config(text=f"Relay {relay_no}: OFF", bg='red', fg='white',width=15, height=5)
+         
+    else:
+        print("Relay {} is already ON".format(relay_no))
+        time.sleep(0.1) 
 
 
 
+# Function to get the content of the textbox and assign it to a variable
+def assign_value():
+    global assigned_value
+    assigned_value = tk.textbox.get("1.0", tk.END).strip()
+    print(f"Assigned value: {assigned_value}")
     
