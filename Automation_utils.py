@@ -67,9 +67,3 @@ def timetoggle_relay(button, relay_no,duration):
 
 
 
-# Function to get the content of the textbox and assign it to a variable
-def assign_value():
-    global assigned_value
-    assigned_value = tk.textbox.get("1.0", tk.END).strip()
-    print(f"Assigned value: {assigned_value}")
-    
