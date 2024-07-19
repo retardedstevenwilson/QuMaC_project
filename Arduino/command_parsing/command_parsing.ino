@@ -1,18 +1,7 @@
-int relayPin_1 = 2; 
-int relayPin_2 = 3; 
-int relayPin_3 = 4; 
-int relayPin_4 = 5; 
-int relayPin_5 = 6; 
-int relayPin_6 = 7; 
-int relayPin_7 = 8; 
-int relayPin_8 = 9; 
-int relayPin_9 = 10; 
-int relayPin_10 = 11; 
-int relayPin_11 = 12; 
-int relayPin_12 = 13; 
-
-
-
+int relayPin_1 = 2; // Pin connected to the relay
+int relayPin_2 = 3; // Pin connected to the relay
+int relayPin_3 = 4; // Pin connected to the relay
+int relayPin_4 = 5; // Pin connected to the relay
 
 char inputString[8]; // Array to hold the input string
 bool stringComplete = false; // Flag to indicate when the input string is complete
@@ -47,7 +36,6 @@ void loop() {
 
     // Parse the input string
     sscanf(inputString, "%d:%d:%d", &cmd_id, &relay_no, &arg);
-
     Serial.print("**********\n");
     Serial.print("VALUES OUTSIDE THE FUNCTION: \n");
     Serial.print(cmd_id);
@@ -55,7 +43,6 @@ void loop() {
     Serial.print(", ");
     Serial.println(arg);
     Serial.print("VALUES INSIDE THE FUNCTION: \n");
-
     // Call functions based on the cmd_id
     if (cmd_id == 1) {
       toggle(relay_no, arg);
@@ -71,8 +58,6 @@ void loop() {
     inputString[0] = '\0';
     stringComplete = false;
     }
-
-    
   // Read serial input
   while (Serial.available()) {
     char inChar = (char)Serial.read();
@@ -84,73 +69,92 @@ void loop() {
 
 }
 
-// Relay pin caller
-int getRelayPin(int relay_no) {
-  switch (relay_no) {
-    case 1: return relayPin_1;
-    case 2: return relayPin_2;
-    case 3: return relayPin_3;
-    case 4: return relayPin_4;
-    case 5: return relayPin_5;
-    case 6: return relayPin_6;
-    case 7: return relayPin_7;
-    case 8: return relayPin_8;
-    case 9: return relayPin_9;
-    case 10: return relayPin_10;
-    case 11: return relayPin_11;
-    case 12: return relayPin_12;
-    
-    
-    
-    default: return -1; // Invalid relay number
-  }
-}
-
-
   // Example toggle
-void toggle(int relay_no, int arg) {
-    int relayPin = getRelayPin(relay_no);
-    if (relayPin == -1) {
-      Serial.println("Unknown relay number");
-      return;
-    }
+  void toggle(int relay_no, int arg) {
     Serial.print("*toggle* called with values: ");
     Serial.print(relay_no);
     Serial.print(", ");
     Serial.println(arg);
-
+    if (relay_no == 1){
       if (arg == 1) {
-        digitalWrite(relayPin, HIGH); // Turn relay 1 on
+        digitalWrite(relayPin_1, HIGH); // Turn relay 1 on
         } 
       else if (arg == 0) {
-          digitalWrite(relayPin, LOW); // Turn relay 1 off
+          digitalWrite(relayPin_1, LOW); // Turn relay 1 off
         }
       else {
       Serial.println("Unknown command");
       }
-}
-
+    }
+    else if (relay_no == 2){
+      if (arg == 1) {
+        digitalWrite(relayPin_2, HIGH); 
+      } 
+      else if (arg == 0) {
+        digitalWrite(relayPin_2, LOW); 
+      }
+      else {
+      Serial.println("Unknown command");
+      }
+    }
+    else if (relay_no == 3){
+      if (arg == 1) {
+        digitalWrite(relayPin_3, HIGH); 
+      } 
+      else if (arg == 0) {
+        digitalWrite(relayPin_3, LOW); 
+      }
+    else {
+      Serial.println("Unknown command");
+      }
+    }
+    else if (relay_no == 4){
+      if (arg == 1) {
+        digitalWrite(relayPin_4, HIGH); 
+      } 
+      else if (arg == 0) {
+        digitalWrite(relayPin_4, LOW);
+      }
+      else {
+      Serial.println("Unknown command");
+      }
+    }
+    else {
+      Serial.println("Unknown command");
+    }
+  }
 
 
 void timer_toggle(int relay_no, int arg) {
-  int relayPin = getRelayPin(relay_no);
-  if (relayPin == -1) {
-      Serial.println("Unknown relay number");
-      return;
-  }
-
   // arg is the time interval
   Serial.print("timer_toggle called with values: ");
   Serial.print(relay_no);
   Serial.print(", ");
   Serial.println(arg);
 
-  if (arg <= 10000) {
-    digitalWrite(relayPin, LOW); 
-    delay(arg);
-    digitalWrite(relayPin, HIGH);
+  if (arg <= 1000) {
+    if (relay_no == 1){
+      digitalWrite(relayPin_1, HIGH);
+      delay(arg);
+      digitalWrite(relayPin_1, LOW); 
     }
-     
+    else if (relay_no == 2){
+      digitalWrite(relayPin_2, HIGH); 
+      delay(arg);
+      digitalWrite(relayPin_2, LOW); 
+    }
+
+    else if (relay_no == 3){
+      digitalWrite(relayPin_3, HIGH); 
+      delay(arg);
+      digitalWrite(relayPin_3, LOW); 
+    }  
+    else if (relay_no == 4){
+      digitalWrite(relayPin_3, HIGH); 
+      delay(arg);
+      digitalWrite(relayPin_3, LOW);
+    }
+  }   
   else {
     Serial.println("time too long");
   }

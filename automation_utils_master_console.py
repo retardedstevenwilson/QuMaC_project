@@ -66,4 +66,3 @@ def timetoggle_relay(button, relay_no,duration):
         time.sleep(0.1) 
 
 
-

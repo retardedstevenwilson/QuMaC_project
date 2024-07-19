@@ -1,4 +1,4 @@
-import Automation_utils as Q
+import automation_utils_master_console as Q
 import tkinter as tk
 from tkinter import scrolledtext
 from tkinter import PhotoImage
@@ -11,7 +11,9 @@ import sys
 Q.arduino = serial.Serial('COM6', 9600)  # Change 'COM6' to your Arduino port
 time.sleep(2)  # Give some time for the connection to be established
 
-Q.relay_states = {1: False, 2: False, 3: False,4: False}
+Q.relay_states = {1: False, 2: False, 3: False, 4: False,
+                  5: False, 6: False, 7: False, 8: False,
+                  9: False, 10: False, 11: False, 12: False}
 
 class RedirectText:
     def __init__(self, text_widget):
@@ -28,12 +30,14 @@ class RedirectText:
 toggletime = int(500)
 
 def save_textbox_input(textbox_no):
-    # global toggletime
+    global toggletime
     input_text = textbox_no.get("1.0", "end-1c")
     print("Delay time (in ms):", input_text)
     toggletime = int(input_text)
 
 
+def toggle_off(relay_no):
+    Q.arduino.write(f'1:{relay_no}:1\n'.encode('utf-8'))  # Send '0' to turn relay off
 
 
 # Create the main window
@@ -84,7 +88,7 @@ sys.stdout = RedirectText(terminal_output)
 
 
 
-# Second row - Pump Toggles
+# Second row - Pump Toggles-------------------------------------------------------------------------------
 pump_toggle_frame = ttk.LabelFrame(root, text="Pump Toggles")
 pump_toggle_frame.grid(row=1, column=0, padx=10, pady=10, columnspan=4, sticky="ew")
 
@@ -101,6 +105,19 @@ button_3.grid(row = 2, column = 2,  padx=10, pady=10)
 button_4 = tk.Button(pump_toggle_frame, text="Relay 4: OFF", command=lambda: Q.toggle_relay(button_4, 4), width=15, height=5)
 button_4.grid(row = 2, column = 3,  padx=10, pady=10)
 
+button_5 = tk.Button(pump_toggle_frame, text="Relay 5: OFF", command=lambda: Q.toggle_relay(button_5, 5), width=15, height=5)
+button_5.grid(row = 2, column = 4,  padx=10, pady=10)
+
+button_6 = tk.Button(pump_toggle_frame, text="Relay 6: OFF", command=lambda: Q.toggle_relay(button_6, 6), width=15, height=5)
+button_6.grid(row = 2, column = 5,  padx=10, pady=10)
+
+button_7 = tk.Button(pump_toggle_frame, text="Relay 7: OFF", command=lambda: Q.toggle_relay(button_7, 7), width=15, height=5)
+button_7.grid(row = 2, column = 6,  padx=10, pady=10)
+
+button_8 = tk.Button(pump_toggle_frame, text="Relay 8: OFF", command=lambda: Q.toggle_relay(button_8, 8), width=15, height=5)
+button_8.grid(row = 2, column = 7,  padx=10, pady=10)
+
+
 
 # Third row - Pump  timing Toggles
 time_toggle_frame = ttk.LabelFrame(root, text="Time Toggles")
@@ -114,8 +131,6 @@ button.grid(row = 3, column = 1,  padx=10, pady=10)
 
 # textbox_time = tk.Text(time_toggle_frame,height = 1,width = 10)
 # textbox.grid(row =3, column = 2,  padx=10, pady=10)
-
-
 
 
 
@@ -135,12 +150,34 @@ button_4_timers = tk.Button(time_toggle_frame, text="Relay 4",
                             command=lambda: Q.timetoggle_relay(button_4, 4,toggletime), width=15, height=5)
 button_4_timers.grid(row = 2, column = 3,  padx=10, pady=10)
 
+button_5_timers = tk.Button(time_toggle_frame, text="Relay 5",
+                           command=lambda: Q.timetoggle_relay(button_5, 5,toggletime), width=15, height=5)
+button_5_timers.grid(row = 2, column = 4,  padx=10, pady=10)
+
+button_6_timers = tk.Button(time_toggle_frame, text="Relay 6",
+                            command=lambda: Q.timetoggle_relay(button_6, 6,toggletime), width=15, height=5)
+button_6_timers.grid(row = 2, column = 5,  padx=10, pady=10)
+
+button_7_timers = tk.Button(time_toggle_frame, text="Relay 7",
+                            command=lambda: Q.timetoggle_relay(button_7, 7,toggletime), width=15, height=5)
+button_7_timers.grid(row = 2, column = 6,  padx=10, pady=10)
+
+button_8_timers = tk.Button(time_toggle_frame, text="Relay 8",
+                            command=lambda: Q.timetoggle_relay(button_8, 8,toggletime), width=15, height=5)
+button_8_timers.grid(row = 2, column = 7,  padx=10, pady=10)
 
 
 
 # Start the Tkinter main loop
 root.mainloop()
 
+    
+
 # Close the serial ports when the program is closed
 for ser in serial_connections:
     ser.close()
+
+
+#turning off all relays when exiting ?????
+for relay_no in range(1,4,1):
+    toggle_off(relay_no)

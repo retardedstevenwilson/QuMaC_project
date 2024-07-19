@@ -2,17 +2,6 @@ int relayPin_1 = 2;
 int relayPin_2 = 3; 
 int relayPin_3 = 4; 
 int relayPin_4 = 5; 
-int relayPin_5 = 6; 
-int relayPin_6 = 7; 
-int relayPin_7 = 8; 
-int relayPin_8 = 9; 
-int relayPin_9 = 10; 
-int relayPin_10 = 11; 
-int relayPin_11 = 12; 
-int relayPin_12 = 13; 
-
-
-
 
 char inputString[8]; // Array to hold the input string
 bool stringComplete = false; // Flag to indicate when the input string is complete
@@ -91,17 +80,6 @@ int getRelayPin(int relay_no) {
     case 2: return relayPin_2;
     case 3: return relayPin_3;
     case 4: return relayPin_4;
-    case 5: return relayPin_5;
-    case 6: return relayPin_6;
-    case 7: return relayPin_7;
-    case 8: return relayPin_8;
-    case 9: return relayPin_9;
-    case 10: return relayPin_10;
-    case 11: return relayPin_11;
-    case 12: return relayPin_12;
-    
-    
-    
     default: return -1; // Invalid relay number
   }
 }
