@@ -1,30 +1,31 @@
 import tkinter as tk
 from tkinter import scrolledtext
 from tkinter import PhotoImage
-# import serial
+import serial
 import threading
 import time
+import os
 
 
-# def read_from_serial(ser):
+def read_from_serial(ser):
     
-#     if ser.in_waiting > 0:
-#         data = ser.readline().decode('utf-8').strip()
-#         return data
-#     else:
-#         print("NO INPUT")
-#     time.sleep(1)  # Add a delay to avoid constant updating
+    if ser.in_waiting > 0:
+        data = ser.readline().decode('utf-8').strip()
+        return data
+    else:
+        print("NO INPUT")
+    time.sleep(1)  # Add a delay to avoid constant updating
 
 
 
 
-# # Function to create a serial connection
-# def create_serial_connection(port, baud_rate):
-#     try:
-#         return serial.Serial(port, baud_rate, timeout=1)
-#     except serial.SerialException as e:
-#         print(f"Error opening serial port {port}: {e}")
-#         return None
+# Function to create a serial connection
+def create_serial_connection(port, baud_rate):
+    try:
+        return serial.Serial(port, baud_rate, timeout=1)
+    except serial.SerialException as e:
+        print(f"Error opening serial port {port}: {e}")
+        return None
 
 # TOGGLE SWITCHES --------------------------------------------------------
 
@@ -41,6 +42,8 @@ def toggle_relay(relay_no,state):
         time.sleep(0.1) 
     else:
         print("Invalid command: Enter the state")
+
+  
     
 def timetoggle_relay(relay_no,duration):
     # Function code = 2
@@ -53,7 +56,6 @@ def timetoggle_relay(relay_no,duration):
     
          
    
-import os
 
 def read_last_entry(log_file):
     """Reads the last entry from the specified log file without reading the entire file.
@@ -89,32 +91,73 @@ def read_last_entry(log_file):
         
         # Decode the buffer to get the last line as a string, stripping any trailing newline characters
         last_entry = buffer.decode('utf-8').strip()
+        print(last_entry)
         
     return last_entry
 
 
 
-def log_serial_data(port, baud_rate, log_file):
+def log_serial_data(port, baud_rate, log_file,timeout=0):
     # Open the serial port
     ser = serial.Serial(port, baud_rate, timeout=1)
     
     # Open the log file in append mode
     with open(log_file, 'a') as file:
-        print("Logging started. Press Ctrl+C to stop.")
-        try:
-            while True:
-                # Read a line from the serial port
-                line = ser.readline().decode('utf-8').strip()
-                
-                if line:
-                    # Print the line to the console
-                    print(line)
+
+        if timeout == 0:
+            print("Logging started. Press Ctrl+C to stop.")
+            try:
+                while True:
+                    # Read a line from the serial port
+                    line = ser.readline().decode('utf-8').strip()
                     
-                    # Write the line to the log file with a timestamp
-                    file.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {line}\n")
-                    
-        except KeyboardInterrupt:
+                    if line:
+                        # Print the line to the console
+                        print(line)
+                        
+                        # Write the line to the log file with a timestamp
+                        file.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {line}\n")        
+            except KeyboardInterrupt:
+                print("Logging stopped.")
+            finally:
+                #reading the last entry
+                print("final pressure =: ",read_last_entry(log_file))
+                # Close the serial port
+                ser.close()
+        else:
+            print("Logging started for {} seconds. Press Ctrl+C to stop.",timeout)
+            t_init= time.time()
+            while time.time()-t_init < timeout:
+                    # Read a line from the serial port
+                    line = ser.readline().decode('utf-8').strip()
+                    if line:
+                        # Print the line to the console
+                        print(line)
+                        # Write the line to the log file with a timestamp
+                        file.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {line}\n")
+
             print("Logging stopped.")
-        finally:
+            #reading the last entry
+            print("final pressure =: ",read_last_entry(log_file))
             # Close the serial port
             ser.close()
+        
+
+
+# def pressure_toggle(port,log_file,p_opt,relay,toggletime):
+#     global baud_rate
+#     log_serial_data(port, baud_rate, log_file)
+#     time.sleep(10)
+#     KeyboardInterrupt
+#     p_current=read_last_entry(log_file)
+#     while p_current - p_opt < 0.1 *p_opt :
+#         log_serial_data(port, baud_rate, log_file)
+#         time.sleep(5)
+#         KeyboardInterrupt
+#         p_current=read_last_entry(log_file)
+
+    
+
+
+    
+    
