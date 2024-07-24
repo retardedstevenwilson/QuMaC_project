@@ -37,8 +37,18 @@ class ArduinoConnector:
     def __init__(self, port):
         self.port = port
         self.arduino = None
+        self.cleanup()
         self.connect()
         atexit.register(self.reset_and_close)
+
+    def cleanup(self):
+        # Close any existing connection to free up the port
+        try:
+            temp_connection = serial.Serial(self.port, 9600, timeout=1)
+            temp_connection.close()
+            print(f"Cleaned up any previous connections on {self.port}")
+        except serial.SerialException as e:
+            print(f"No need for cleanup: {e}")
 
     def connect(self):
         try:
