@@ -28,6 +28,41 @@ def create_serial_connection(port, baud_rate):
         return None
 
 # TOGGLE SWITCHES --------------------------------------------------------
+# Arduino class
+import serial
+import time
+import atexit
+
+class ArduinoConnector:
+    def __init__(self, port):
+        self.port = port
+        self.arduino = None
+        self.connect()
+        atexit.register(self.reset_and_close)
+
+    def connect(self):
+        try:
+            self.arduino = serial.Serial(self.port, 9600, timeout=1)
+            time.sleep(2)  # Wait for the connection to be established
+            print(f"Connected to Arduino on {self.port}")
+        except serial.SerialException as e:
+            print(f"Error: {e}")
+
+    def reset_arduino(self):
+        if self.arduino and self.arduino.is_open:
+            print("Resetting Arduino...")
+            self.arduino.setDTR(False)
+            time.sleep(1)
+            self.arduino.setDTR(True)
+            time.sleep(2)
+            print("Arduino has been reset.")
+
+    def reset_and_close(self):
+        self.reset_arduino()
+        if self.arduino and self.arduino.is_open:
+            self.arduino.close()
+            print("Connection to Arduino closed.")
+
 
 
 def toggle_relay(relay_no,state):
@@ -119,29 +154,33 @@ def log_serial_data(port, baud_rate, log_file,timeout=0):
                         file.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {line}\n")        
             except KeyboardInterrupt:
                 print("Logging stopped.")
-            finally:
-                #reading the last entry
-                print("final pressure =: ",read_last_entry(log_file))
-                # Close the serial port
-                ser.close()
         else:
-            print("Logging started for {} seconds. Press Ctrl+C to stop.",timeout)
+            print("Logging started for {} seconds. Press Ctrl+C to stop.".format(timeout))
             t_init= time.time()
-            while time.time()-t_init < timeout:
-                    # Read a line from the serial port
-                    line = ser.readline().decode('utf-8').strip()
-                    if line:
-                        # Print the line to the console
-                        print(line)
-                        # Write the line to the log file with a timestamp
-                        file.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {line}\n")
+            try:
+                while time.time()-t_init < timeout:
+                        # Read a line from the serial port
+                        line = ser.readline().decode('utf-8').strip()
+                        if line:
+                            # Print the line to the console
+                            print(line)
 
-            print("Logging stopped.")
-            #reading the last entry
-            print("final pressure =: ",read_last_entry(log_file))
-            # Close the serial port
-            ser.close()
-        
+                            # Write the line to the log file with a timestamp
+                            file.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {line}\n")
+                            
+                # print("Logging stopped.")
+                # #reading the last entry
+                # print("final pressure =: ",read_last_entry(log_file))
+                # # Close the serial port
+                # ser.close()
+            except Exception as e:
+                print(e)
+        #reading the last entry
+        print("final pressure =: ",read_last_entry(log_file))
+        # Close the serial port
+        ser.close()
+
+
 
 
 # def pressure_toggle(port,log_file,p_opt,relay,toggletime):
