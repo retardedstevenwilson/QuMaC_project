@@ -111,11 +111,42 @@ class ArduinoConnector:
 #         self.connect()
 #         atexit.register(self.reset_and_close)
 
+def parse_serial_data(data_string):
+    elements = data_string.split(',')
+    elements = [element.strip() for element in elements]
+    pressure_value =float(elements[1]) #enter whatever you wanna return. We only want pressure values here
+    return pressure_value
+
+def read_last_entry(log_file):
+    '''Read last entry. Return pressure value'''
+    with open(log_file, 'rb') as file:
+        # Move the cursor to the end of the file
+        file.seek(0, os.SEEK_END)
+        # Initialize variables to track the position and buffer
+        position = file.tell()
+        buffer = b''       
+        # Traverse backwards in the file
+        while position > 0:
+            # Move cursor back by one byte
+            position -= 1
+            file.seek(position)
+            # Read the byte at the current position
+            byte = file.read(1)            
+            # Prepend the byte to the buffer
+            buffer = byte + buffer
+            # Check for newline character (indicating the end of the last line)
+            if byte == b'\n' and buffer != b'\n':
+                # Break if we've reached the start of the last line
+                break      
+        # Decode the buffer to get the last line as a string, stripping any trailing newline characters
+        last_entry = buffer.decode('utf-8').strip()
+        pressure_value=parse_serial_data(last_entry)    
+    return pressure_value
+
 
 def log_serial_data(port, baud_rate, log_file,timeout=0):
     # Open the serial port
     ser = serial.Serial(port, baud_rate, timeout=1)
-    
     # Open the log file in append mode
     with open(log_file, 'a') as file:
         if timeout == 0:
@@ -149,33 +180,6 @@ def log_serial_data(port, baud_rate, log_file,timeout=0):
         print("final pressure =: ",read_last_entry(log_file))
         # Close the serial port
         ser.close()
-
-
-
-def read_last_entry(log_file):
-    with open(log_file, 'rb') as file:
-        # Move the cursor to the end of the file
-        file.seek(0, os.SEEK_END)
-        # Initialize variables to track the position and buffer
-        position = file.tell()
-        buffer = b''       
-        # Traverse backwards in the file
-        while position > 0:
-            # Move cursor back by one byte
-            position -= 1
-            file.seek(position)
-            # Read the byte at the current position
-            byte = file.read(1)            
-            # Prepend the byte to the buffer
-            buffer = byte + buffer
-            # Check for newline character (indicating the end of the last line)
-            if byte == b'\n' and buffer != b'\n':
-                # Break if we've reached the start of the last line
-                break      
-        # Decode the buffer to get the last line as a string, stripping any trailing newline characters
-        last_entry = buffer.decode('utf-8').strip()
-        print(last_entry)     
-    return last_entry
 
 
 
