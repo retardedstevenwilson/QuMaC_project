@@ -7,7 +7,7 @@ import os
 import serial
 import time
 import atexit
-
+import numpy as np
 
 
 def read_from_serial(ser):
@@ -104,99 +104,97 @@ class ArduinoConnector:
             print(e)
          
    
-# class pgauge:
-#     def __init__(self, port):
-#         self.port = port
-#         self.cleanup()
-#         self.connect()
-#         atexit.register(self.reset_and_close)
+class pgauge:
+    def __init__(self,name,port,relay_no):
+        self.port = port
+        self.name = name
+        self.baudrate =9600
+        self.relay_no=relay_no
+        self.log_file = f"{self.name}_log.txt"
+        # self.pressure=
 
-def parse_serial_data(data_string):
-    elements = data_string.split(',')
-    elements = [element.strip() for element in elements]
-    pressure_value =float(elements[1]) #enter whatever you wanna return. We only want pressure values here
-    return pressure_value
 
-def read_last_entry(log_file):
-    '''Read last entry. Return pressure value'''
-    with open(log_file, 'rb') as file:
-        # Move the cursor to the end of the file
-        file.seek(0, os.SEEK_END)
-        # Initialize variables to track the position and buffer
-        position = file.tell()
-        buffer = b''       
-        # Traverse backwards in the file
-        while position > 0:
-            # Move cursor back by one byte
-            position -= 1
-            file.seek(position)
-            # Read the byte at the current position
-            byte = file.read(1)            
-            # Prepend the byte to the buffer
-            buffer = byte + buffer
-            # Check for newline character (indicating the end of the last line)
-            if byte == b'\n' and buffer != b'\n':
-                # Break if we've reached the start of the last line
-                break      
+    def parse_serial_data(self,data_string):
+        elements = data_string.split(',')
+        elements = [element.strip() for element in elements]
+        print(elements)
+        pressure_value =float(elements[1]) #enter whatever you wanna return. We only want pressure values here
+        return pressure_value
+
+    def read_last_entry(self):
+        '''Read last entry. Return pressure value'''
+        with open(self.log_file, 'rb') as file:
+            # Move the cursor to the end of the file
+            file.seek(0, os.SEEK_END)
+            # Initialize variables to track the position and buffer
+            position = file.tell()
+            buffer = b''       
+            # Traverse backwards in the file
+            while position > 0:
+                # Move cursor back by one byte
+                position -= 1
+                file.seek(position)
+                # Read the byte at the current position
+                byte = file.read(1)            
+                # Prepend the byte to the buffer
+                buffer = byte + buffer
+                # Check for newline character (indicating the end of the last line)
+                if byte == b'\n' and buffer != b'\n':
+                    # Break if we've reached the start of the last line
+                    break      
         # Decode the buffer to get the last line as a string, stripping any trailing newline characters
         last_entry = buffer.decode('utf-8').strip()
-        pressure_value=parse_serial_data(last_entry)    
-    return pressure_value
+        pressure_value=self.parse_serial_data(last_entry)   
+        return pressure_value
 
 
-def log_serial_data(port, baud_rate, log_file,timeout=0):
-    # Open the serial port
-    ser = serial.Serial(port, baud_rate, timeout=1)
-    # Open the log file in append mode
-    with open(log_file, 'a') as file:
-        if timeout == 0:
-            print("Logging started. Press Ctrl+C to stop.")
-            try:
-                while True:
-                    # Read a line from the serial port
-                    line = ser.readline().decode('utf-8').strip()                
-                    if line:
-                        # Print the line to the console
-                        print(line)
-                        # Write the line to the log file with a timestamp
-                        file.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {line}\n")        
-            except KeyboardInterrupt:
-                print("Logging stopped.")
-        else:
-            print("Logging started for {} seconds. Press Ctrl+C to stop.".format(timeout))
-            t_init= time.time()
-            try:
-                while time.time()-t_init < timeout:
+    def log_serial_data(self,timeout=0):
+        # Open the serial port
+        ser = serial.Serial(self.port, self.baudrate, timeout=1)
+        # Open the log file in append mode
+        with open(self.log_file, 'a') as file:
+            if timeout == 0:
+                print("Logging started. Press Ctrl+C to stop.")
+                try:
+                    while True:
                         # Read a line from the serial port
-                        line = ser.readline().decode('utf-8').strip()
+                        line = ser.readline().decode('utf-8').strip()                
                         if line:
                             # Print the line to the console
                             print(line)
                             # Write the line to the log file with a timestamp
-                            file.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {line}\n")                        
-            except Exception as e:
-                print(e)
+                            file.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {line}\n")        
+                except KeyboardInterrupt:
+                    print("Logging stopped.")
+            else:
+                print("Logging started for {} seconds. Press Ctrl+C to stop.".format(timeout))
+                t_init= time.time()
+                try:
+                    while time.time()-t_init < timeout:
+                            # Read a line from the serial port
+                            line = ser.readline().decode('utf-8').strip()
+                            if line:
+                                # Print the line to the console
+                                print(line)
+                                # Write the line to the log file with a timestamp
+                                file.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {line}\n")                        
+                except Exception as e:
+                    print(e)
         #reading the last entry
-        print("final pressure =: ",read_last_entry(log_file))
-        # Close the serial port
+        print("final pressure =: ",self.read_last_entry())
+        # Close the serial port 
         ser.close()
 
 
+    # def pressure_toggle(arduino,gauge,duration=100,p_opt):
+    #     gauge.log_serial_data(timeout=3)
+    #     p_current= gauge.read_last_entry()
+    #     thr=0.001    
+    #     while np.abs(p_opt-p_current) <=thr:
+    #         arduino.timetoggle
+            
 
 
-
-
-# def pressure_toggle(port,log_file,p_opt,relay,toggletime):
-#     global baud_rate
-#     log_serial_data(port, baud_rate, log_file)
-#     time.sleep(10)
-#     KeyboardInterrupt
-#     p_current=read_last_entry(log_file)
-#     while p_current - p_opt < 0.1 *p_opt :
-#         log_serial_data(port, baud_rate, log_file)
-#         time.sleep(5)
-#         KeyboardInterrupt
-#         p_current=read_last_entry(log_file)
 
     
 
