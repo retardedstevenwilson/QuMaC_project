@@ -1,10 +1,13 @@
 import tkinter as tk
 from tkinter import scrolledtext
 from tkinter import PhotoImage
-import serial
 import threading
 import time
 import os
+import serial
+import time
+import atexit
+
 
 
 def read_from_serial(ser):
@@ -27,11 +30,8 @@ def create_serial_connection(port, baud_rate):
         print(f"Error opening serial port {port}: {e}")
         return None
 
-# TOGGLE SWITCHES --------------------------------------------------------
-# Arduino class
-import serial
-import time
-import atexit
+# Arduino class --------------------------------------------------------
+
 
 class ArduinoConnector:
     def __init__(self, port):
@@ -74,72 +74,36 @@ class ArduinoConnector:
             print("Connection to Arduino closed.")
 
 
-
-def toggle_relay(relay_no,state):
-    global arduino
-    if state == True:
-        arduino.write(f'1:{relay_no}:0\n'.encode('utf-8'))  # Send '0' to turn relay off
-        print("Relay {}: ON".format(relay_no))
-        time.sleep(0.1) 
-    elif state ==False:
-        arduino.write(f'1:{relay_no}:1\n'.encode('utf-8'))  # Send '1' to turn relay on
-        print("Relay {}: OFF".format(relay_no))
-        time.sleep(0.1) 
-    else:
-        print("Invalid command: Enter the state")
-
-  
-    
-def timetoggle_relay(relay_no,duration):
-    # Function code = 2
-    global arduino
-    global relay_states
-    state = relay_states[relay_no]
+    def toggle_relay(self, relay_no, state):
+        try:
+            if self.arduino and self.arduino.is_open:
+                if state:
+                    self.arduino.write(f'1:{relay_no}:0\n'.encode('utf-8'))  # Send '0' to turn relay on
+                    print(f"Relay {relay_no}: ON")
+                    time.sleep(0.1)
+                elif state == False:
+                    self.arduino.write(f'1:{relay_no}:1\n'.encode('utf-8'))  # Send '1' to turn relay off
+                    print(f"Relay {relay_no}: OFF")
+                    time.sleep(0.1)    
+        except Exception as e:
+            print(e)
    
-    arduino.write(f'2:{relay_no}:{duration}\n'.encode('utf-8'))  # Send '0' to turn relay off
-    time.sleep(duration/1000)
-    
+    def timetoggle_relay(self,relay_no,duration):
+        # Function code = 2
+        try:
+            if self.arduino and self.arduino.is_open:
+                self.arduino.write(f'2:{relay_no}:{duration}\n'.encode('utf-8'))  # Send '0' to turn relay off
+                time.sleep(duration/1000)
+        except Exception as e:
+            print(e)
          
    
-
-def read_last_entry(log_file):
-    """Reads the last entry from the specified log file without reading the entire file.
-    Args:
-        log_file (str): Path to the log file.    
-    Returns:
-        str: The last entry in the log file.
-    """
-    with open(log_file, 'rb') as file:
-        # Move the cursor to the end of the file
-        file.seek(0, os.SEEK_END)
-
-        # Initialize variables to track the position and buffer
-        position = file.tell()
-        buffer = b''
-        
-        # Traverse backwards in the file
-        while position > 0:
-            # Move cursor back by one byte
-            position -= 1
-            file.seek(position)
-            
-            # Read the byte at the current position
-            byte = file.read(1)
-            
-            # Prepend the byte to the buffer
-            buffer = byte + buffer
-            
-            # Check for newline character (indicating the end of the last line)
-            if byte == b'\n' and buffer != b'\n':
-                # Break if we've reached the start of the last line
-                break
-        
-        # Decode the buffer to get the last line as a string, stripping any trailing newline characters
-        last_entry = buffer.decode('utf-8').strip()
-        print(last_entry)
-        
-    return last_entry
-
+# class pgauge:
+#     def __init__(self, port):
+#         self.port = port
+#         self.cleanup()
+#         self.connect()
+#         atexit.register(self.reset_and_close)
 
 
 def log_serial_data(port, baud_rate, log_file,timeout=0):
@@ -176,19 +140,53 @@ def log_serial_data(port, baud_rate, log_file,timeout=0):
                             print(line)
 
                             # Write the line to the log file with a timestamp
-                            file.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {line}\n")
-                            
-                # print("Logging stopped.")
-                # #reading the last entry
-                # print("final pressure =: ",read_last_entry(log_file))
-                # # Close the serial port
-                # ser.close()
+                            file.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {line}\n")                        
             except Exception as e:
                 print(e)
         #reading the last entry
         print("final pressure =: ",read_last_entry(log_file))
         # Close the serial port
         ser.close()
+
+
+
+def read_last_entry(log_file):
+    """Reads the last entry from the specified log file without reading the entire file.
+    Args:
+        log_file (str): Path to the log file.    
+    Returns:
+        str: The last entry in the log file.
+    """
+    with open(log_file, 'rb') as file:
+        # Move the cursor to the end of the file
+        file.seek(0, os.SEEK_END)
+        # Initialize variables to track the position and buffer
+        position = file.tell()
+        buffer = b''       
+        # Traverse backwards in the file
+        while position > 0:
+            # Move cursor back by one byte
+            position -= 1
+            file.seek(position)
+            
+            # Read the byte at the current position
+            byte = file.read(1)
+            
+            # Prepend the byte to the buffer
+            buffer = byte + buffer
+            
+            # Check for newline character (indicating the end of the last line)
+            if byte == b'\n' and buffer != b'\n':
+                # Break if we've reached the start of the last line
+                break
+        
+        # Decode the buffer to get the last line as a string, stripping any trailing newline characters
+        last_entry = buffer.decode('utf-8').strip()
+        print(last_entry)
+        
+    return last_entry
+
+
 
 
 
