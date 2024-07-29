@@ -15,11 +15,11 @@ def buffer_toggle(p_opt,duration=5,toggletime=0.1):
     buffervolume.log_serial_data(timeout=duration)
     p_current= buffervolume.read_last_entry()
     thr=0.1
-    p_max=1.000
+    p_max=760
     if p_current >=p_max:
         print('ALERT: BUFFER PRESSURE REACHED MAXIMUM')
     else:    
-        while p_opt-p_current<=thr:
+        while p_opt-p_current>=thr:
             arduino.timetoggle_relay(buffervolume.relay_no(),toggletime)
             time.sleep(1)
             buffervolume.log_serial_data(timeout=duration)
@@ -34,12 +34,12 @@ def mainchamber_toggle(p_opt,duration=5,toggletime=0.1):
     '''inputs: p_opt, duration of logging after each toggle, and toggletime'''
     mainchamber.log_serial_data(timeout=duration)
     p_current= mainchamber.read_last_entry()
-    thr=0.1
-    p_max=1.000
+    thr=0.01
+    p_max=760
     if p_current >=p_max:
         print('ALERT: MAINCHAMBER PRESSURE REACHED MAXIMUM')
     else:    
-        while p_opt-p_current<=thr:
+        while p_opt-p_current>=thr:
             arduino.timetoggle_relay(buffervolume.relay_no(),toggletime)
             time.sleep(1)
             mainchamber.log_serial_data(timeout=duration)
@@ -55,12 +55,12 @@ def loadlock_toggle(p_opt,duration=5,toggletime=0.1):
     buffervolume.log_serial_data(timeout=duration)
     p_current= buffervolume.read_last_entry()
     thr=0.1
-    p_max=1.000
+    p_max=760
     if p_current >=p_max:
         print('ALERT: LOADLOCK PRESSURE REACHED MAXIMUM')
     else:
         count=0    
-        while p_opt-p_current<=thr:
+        while p_opt-p_current >=thr:
             print("p_current = {p_current}, togglecount = {count} \n")
             arduino.timetoggle_relay(buffervolume.relay_no(),toggletime)
             time.sleep(1)
