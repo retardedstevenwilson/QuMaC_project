@@ -107,10 +107,11 @@ class ArduinoConnector:
          
    
 class pgauge:
-    def __init__(self,port,relay_no):
+    def __init__(self,name,port,relay_no):
         self.port = port
         self.baudrate =9600
         self.relay_no=relay_no
+        self.name = name
         self.log_file = f"{self.name}_log.txt"
         self.cleanup()
         self.connect()
