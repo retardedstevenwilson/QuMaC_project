@@ -113,26 +113,7 @@ class pgauge:
         self.relay_no=relay_no
         self.name = name
         self.log_file = f"{self.name}_log.txt"
-        self.cleanup()
-        self.connect()
-
-        # self.pressure=
-    def cleanup(self):
-        # Close any existing connection to free up the port
-        try:
-            temp_connection = serial.Serial(self.port, 9600, timeout=1)
-            temp_connection.close()
-            print(f"Cleaned up any previous connections on {self.port}")
-        except serial.SerialException as e:
-            print(e)
-
-    def connect(self):
-        try:
-            self.gauge = serial.Serial(self.port, 9600, timeout=1)
-            time.sleep(2)  # Wait for the connection to be established
-            print(f"Connected to {self.name} on {self.port}")
-        except serial.SerialException as e:
-            print(f"Error: {e}")
+        print(f"Connected to {self.name} on {self.port}")
 
 
     def parse_serial_data(self,data_string):
