@@ -180,8 +180,8 @@ class pgauge:
                                 print(line)
                                 # Write the line to the log file with a timestamp
                                 file.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {line}\n")                        
-                except Exception as e:
-                    print(e)
+                except KeyboardInterrupt:
+                    print("Logging stopped")
         #reading the last entry
         print("final pressure =: ",self.read_last_entry())
         # Close the serial port 
