@@ -37,6 +37,7 @@ class ArduinoConnector:
     def __init__(self, port):
         self.port = port
         self.arduino = None
+        self.reset()
         self.cleanup()
         self.connect()
         atexit.register(self.reset_and_close)
@@ -80,6 +81,7 @@ class ArduinoConnector:
     
 
     def toggle_relay(self, relay_no, state):
+        #function code = 1
         try:
             if self.arduino and self.arduino.is_open:
                 if state:
@@ -93,25 +95,43 @@ class ArduinoConnector:
         except Exception as e:
             print(e)
    
-    def timetoggle_relay(self,relay_no,duration):
+    def timetoggle_relay(self,relay_no,duration=0.1):
         # Function code = 2
         try:
             if self.arduino and self.arduino.is_open:
-                self.arduino.write(f'2:{relay_no}:{duration}\n'.encode('utf-8'))  # Send '0' to turn relay off
-                print(f"Relay {relay_no} toggled for {duration} ms")
-                time.sleep(duration/1000)
+                self.arduino.write(f'2:{relay_no}:{duration*1000}\n'.encode('utf-8'))  # Send '0' to turn relay off
+                print(f"Relay {relay_no} toggled for {duration} seconds")
+                time.sleep((duration) + 2)
         except Exception as e:
             print(e)
          
    
 class pgauge:
-    def __init__(self,name,port,relay_no):
+    def __init__(self,port,relay_no):
         self.port = port
-        self.name = name
         self.baudrate =9600
         self.relay_no=relay_no
         self.log_file = f"{self.name}_log.txt"
+        self.cleanup()
+        self.connect()
+
         # self.pressure=
+    def cleanup(self):
+        # Close any existing connection to free up the port
+        try:
+            temp_connection = serial.Serial(self.port, 9600, timeout=1)
+            temp_connection.close()
+            print(f"Cleaned up any previous connections on {self.port}")
+        except serial.SerialException as e:
+            print(e)
+
+    def connect(self):
+        try:
+            self.gauge = serial.Serial(self.port, 9600, timeout=1)
+            time.sleep(2)  # Wait for the connection to be established
+            print(f"Connected to {self.name} on {self.port}")
+        except serial.SerialException as e:
+            print(f"Error: {e}")
 
 
     def parse_serial_data(self,data_string):
