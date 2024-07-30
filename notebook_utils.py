@@ -95,22 +95,22 @@ class ArduinoConnector:
         except Exception as e:
             print(e)
    
-    def timetoggle_relay(self,relay_no,duration=0.1):
+    def timetoggle_relay(self,relay_no,toggletime=0.1):
         # Function code = 2
         try:
             if self.arduino and self.arduino.is_open:
-                self.arduino.write(f'2:{relay_no}:{duration*1000}\n'.encode('utf-8'))  # Send '0' to turn relay off
-                print(f"Relay {relay_no} toggled for {duration} seconds")
-                time.sleep((duration) + 2)
+                self.arduino.write(f'2:{relay_no}:{toggletime*1000}\n'.encode('utf-8'))  # Send '0' to turn relay off
+                print(f"Relay {relay_no} toggled for {toggletime} seconds")
+                time.sleep((toggletime) + 2)
         except Exception as e:
             print(e)
          
    
 class pgauge:
-    def __init__(self,name,port,relay_no):
+    def __init__(self,name,port):
         self.port = port
         self.baudrate =9600
-        self.relay_no=relay_no
+
         self.name = name
         self.log_file = f"{self.name}_log.txt"
         print(f"Connected to {self.name} on {self.port}")
@@ -188,15 +188,7 @@ class pgauge:
         ser.close()
 
 
-    # def pressure_toggle(arduino,gauge,duration=100,p_opt):
-    #     gauge.log_serial_data(timeout=3)
-    #     p_current= gauge.read_last_entry()
-    #     thr=0.001    
-    #     while np.abs(p_opt-p_current) <=thr:
-    #         arduino.timetoggle
-            
-
-
+    
 
     
 
