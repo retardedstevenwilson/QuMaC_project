@@ -115,20 +115,24 @@ def N2_toggle(p_opt,duration=10,toggletime=0.1):
 
 
 def roughing_toggle(p_opt,duration=5,toggletime=10):
-    mainchamber.log_serial_data(timeout=5)
-    p_current= mainchamber.read_last_entry()
-    count=0    
     thr=0.1
     try:
+        mainchamber.log_serial_data(timeout=5)
+        p_current= mainchamber.read_last_entry()
+        
+        arduino.toggle_relay(roughing_relay,True)
+        
         while p_current - p_opt >= thr:
-            arduino.timetoggle_relay(roughing_relay,toggletime)
-            time.sleep(2)
             mainchamber.log_serial_data(timeout=duration)
+            time.sleep(1)
             p_current= mainchamber.read_last_entry()
-            print("current p = ",p_current)
-            count+=1
-            print("Toggle {} completed. Waiting 5 seconds for stabilization".format(count))
-            time.sleep(5)
+            print("current p = {}. Roughing continues... ".format(p_current))
+            time.sleep(1)
+        
+        print("Optimum P reached. Turning off the roughing relay")
+        arduino.toggle_relay(roughing_relay,False)
+    
     except KeyboardInterrupt:
-        print("Toggle process manually stopped")
-    print("Final mainchamber presure = {}. Toggling stopped after {} counts".format(p_current,count))
+        print("Roughing toggle manually stopped")
+        arduino.toggle_relay(roughing_relay,False)
+    print("Final mainchamber presure = {}".format(p_current))
