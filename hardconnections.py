@@ -11,7 +11,7 @@ N2_relay=3
 O2_relay=4
 loadlock_to_main_relay=5
 
-buffervolume=Q.pgauge(name='buffervolume',port='COM5')
+buffervolume=Q.pgauge(name='buffervolume',port='COM3') #change comport to 5 for madhavi's laptop
 mainchamber=Q.pgauge(name='mainchamber',port='COM7')
 loadlock=Q.pgauge(name='loadlock',port='COM4')
 
@@ -27,6 +27,7 @@ def timetoggle_buffer_to_loadlock_valve(toggletime):
 
 
 def O2_buffer_toggle(p_opt,duration=10,toggletime=0.1):
+    print("Starting O2 toggle")
     '''inputs: p_opt, duration of logging after each toggle, and toggletime'''
     buffervolume.log_serial_data(timeout=5)
     p_current= buffervolume.read_last_entry()
@@ -54,6 +55,7 @@ def O2_buffer_toggle(p_opt,duration=10,toggletime=0.1):
             
 def N2_toggle(p_opt,duration=5,toggletime=0.1,initial_toggle=1.5):
     '''N2 Charging in the loadlock'''
+    print("Starting N2 toggle")
     arduino.timetoggle_relay(N2_relay,toggletime=initial_toggle)
     loadlock.log_serial_data(timeout=5)
     p_current= loadlock.read_last_entry()
@@ -71,14 +73,15 @@ def N2_toggle(p_opt,duration=5,toggletime=0.1,initial_toggle=1.5):
             count+=1
             print("Toggle {} completed. Waiting 5 seconds for stabilization".format(count))
             time.sleep(5)
+            print("Final mainchamber presure = {}. Toggling stopped after {} counts".format(p_current,count))
     except KeyboardInterrupt:
         print("Toggle process manually stopped")
-    print("Final mainchamber presure = {}. Toggling stopped after {} counts".format(p_current,count))
 
 
 def roughing_toggle(p_opt,duration=5,toggletime=10):
     '''Starts roughing process in the loadlock'''
     thr=0.1
+    print("Starting roughing toggle")
     try:
         loadlock.log_serial_data(timeout=5)
         p_current= loadlock.read_last_entry()

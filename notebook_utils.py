@@ -79,27 +79,36 @@ class ArduinoConnector:
         else:
             print("arduino is not conntected")
     
-
     def toggle_relay(self, relay_no, state):
         #function code = 1
         try:
             if self.arduino and self.arduino.is_open:
                 if state:
                     self.arduino.write(f'1:{relay_no}:0\n'.encode('utf-8'))  # Send '0' to turn relay on
+                    line = self.arduino.readline().decode('utf-8').strip()
+                    if line:
+                        print(f"UNO: {line}")
                     print(f"Relay {relay_no}: ON")
                     time.sleep(0.1)
                 elif state == False:
                     self.arduino.write(f'1:{relay_no}:1\n'.encode('utf-8'))  # Send '1' to turn relay off
+                    line = self.arduino.readline().decode('utf-8').strip()
+                    if line:
+                        print(f"UNO: {line}")
                     print(f"Relay {relay_no}: OFF")
                     time.sleep(0.1)    
         except Exception as e:
             print(e)
    
     def timetoggle_relay(self,relay_no,toggletime=0.1):
+        #all values are sent to arduino by converting into milliseconds
         # Function code = 2
         try:
             if self.arduino and self.arduino.is_open:
-                self.arduino.write(f'2:{relay_no}:{toggletime*1000}\n'.encode('utf-8'))  # Send '0' to turn relay off
+                self.arduino.write(f'2:{relay_no}:{toggletime}\n'.encode('utf-8'))  # Send '0' to turn relay off
+                line = self.arduino.readline().decode('utf-8').strip()
+                if line:
+                    print(f"UNO: {line}")
                 print(f"Relay {relay_no} toggled for {toggletime} seconds")
                 time.sleep((toggletime) + 2)
         except Exception as e:
