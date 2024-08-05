@@ -22,6 +22,7 @@ def loadlock_to_main_valve(value):
 def roughing_valve(value):
     arduino.toggle_relay(roughing_relay,state=value)
 
+
 def timetoggle_buffer_to_loadlock_valve(toggletime):
     arduino.timetoggle_relay(buffer_to_loadlock_relay,toggletime=toggletime)
 
@@ -60,7 +61,7 @@ def N2_toggle(p_opt,duration=5,toggletime=0.1,initial_toggle=1.5):
     loadlock.log_serial_data(timeout=5)
     p_current= loadlock.read_last_entry()
     
-    thr=0.1
+    thr=0.1*p_opt
     count=0
 
     try:
@@ -80,8 +81,10 @@ def N2_toggle(p_opt,duration=5,toggletime=0.1,initial_toggle=1.5):
 
 def roughing_toggle(p_opt,duration=5,toggletime=10):
     '''Starts roughing process in the loadlock'''
-    thr=0.1
-    print("Starting roughing toggle")
+    thr=0.1*p_opt
+    print("Starting roughing toggle. Opening the valve")
+    roughing_valve(True)
+
     try:
         loadlock.log_serial_data(timeout=5)
         p_current= loadlock.read_last_entry()
@@ -101,4 +104,6 @@ def roughing_toggle(p_opt,duration=5,toggletime=10):
     except KeyboardInterrupt:
         print("Roughing toggle manually stopped")
         arduino.toggle_relay(roughing_relay,False)
+        
     print("Final mainchamber presure = {}".format(p_current))
+    
