@@ -122,7 +122,7 @@ class pgauge:
 
         self.name = name
         self.log_file = f"{self.name}_log.txt"
-        print(f"Connected to {self.name} on {self.port}")
+        print(f"Connection: {self.name} on {self.port}")
 
 
     def parse_serial_data(self,data_string):
@@ -192,6 +192,7 @@ class pgauge:
                 except Exception as e:
                     print(e)
         #reading the last entry
+        time.sleep(0.5)
         print("final pressure =: ",self.read_last_entry())
         # Close the serial port 
         ser.close()
