@@ -47,14 +47,14 @@ def O2_buffer_toggle(p_opt,duration=10,toggletime=0.1):
                 print("current p = ",p_current)
                 count+=1
                 print("Toggle {} completed.".format(count))
-                time.sleep(5)
+                # time.sleep(5)
         except KeyboardInterrupt:
             print("Toggle process manually stopped")
         print("Final buffer presure = {}. Toggling stopped after {} counts".format(p_current,count))
 
 
             
-def N2_toggle(p_opt,duration=5,toggletime=0.1,initial_toggle=1.5):
+def N2_toggle(p_opt,duration=3,toggletime=0.2,initial_toggle=1.5):
     '''N2 Charging in the loadlock'''
     print("Starting N2 toggle")
     arduino.timetoggle_relay(N2_relay,toggletime=initial_toggle)
@@ -67,19 +67,19 @@ def N2_toggle(p_opt,duration=5,toggletime=0.1,initial_toggle=1.5):
     try:
         while p_opt-p_current>=thr:
             arduino.timetoggle_relay(N2_relay,toggletime)
-            time.sleep(1)
+            # time.sleep(1)
             loadlock.log_serial_data(timeout=duration)
             p_current= loadlock.read_last_entry()
             print("current p = ",p_current)
             count+=1
-            print("Toggle {} completed. Waiting 5 seconds for stabilization".format(count))
-            time.sleep(5)
+            print("Toggle {} completed.".format(count))
+            # time.sleep(5)
             print("Final mainchamber presure = {}. Toggling stopped after {} counts".format(p_current,count))
     except KeyboardInterrupt:
         print("Toggle process manually stopped")
 
 
-def roughing_toggle(p_opt,duration=5,toggletime=10):
+def roughing_toggle(p_opt,duration=5):
     '''Starts roughing process in the loadlock'''
     thr=0.1*p_opt
     print("Starting roughing toggle. Opening the valve")
@@ -92,8 +92,7 @@ def roughing_toggle(p_opt,duration=5,toggletime=10):
         arduino.toggle_relay(roughing_relay,True)
         
         while p_current - p_opt >= thr:
-            loadlock.log_serial_data(timeout=duration)
-            time.sleep(1)
+            loadlock.log_serial_data(timeout=duration)            
             p_current= loadlock.read_last_entry()
             print("current p = {}. Roughing continues... ".format(p_current))
             time.sleep(1)
