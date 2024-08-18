@@ -145,7 +145,7 @@ void timer_toggle(int relay_no, int arg) {
   Serial.print(", ");
   Serial.println(arg);
 
-  if (arg <= 10000) {
+  if (arg <= 50000) {
     digitalWrite(relayPin, LOW); 
     delay(arg);
     digitalWrite(relayPin, HIGH);

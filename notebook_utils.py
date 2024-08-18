@@ -10,25 +10,25 @@ import atexit
 import numpy as np
 
 
-def read_from_serial(ser):
+# def read_from_serial(ser):
     
-    if ser.in_waiting > 0:
-        data = ser.readline().decode('utf-8').strip()
-        return data
-    else:
-        print("NO INPUT")
-    time.sleep(1)  # Add a delay to avoid constant updating
+#     if ser.in_waiting > 0:
+#         data = ser.readline().decode('utf-8').strip()
+#         return data
+#     else:
+#         print("NO INPUT")
+#     time.sleep(1)  # Add a delay to avoid constant updating
 
 
 
 
-# Function to create a serial connection
-def create_serial_connection(port, baud_rate):
-    try:
-        return serial.Serial(port, baud_rate, timeout=1)
-    except serial.SerialException as e:
-        print(f"Error opening serial port {port}: {e}")
-        return None
+# # Function to create a serial connection
+# def create_serial_connection(port, baud_rate):
+#     try:
+#         return serial.Serial(port, baud_rate, timeout=1)
+#     except serial.SerialException as e:
+#         print(f"Error opening serial port {port}: {e}")
+#         return None
 
 # Arduino class --------------------------------------------------------
 
@@ -124,6 +124,13 @@ class pgauge:
         self.log_file = f"{self.name}_log.txt"
         print(f"Connection: {self.name} on {self.port}")
 
+    # Function to create a serial connection 14 Aug (for console_2)
+    def create_serial_connection(self):
+        try:
+           return serial.Serial(self.port, self.baudrate, timeout=1)
+        except serial.SerialException as e:
+            print(f"Error opening serial port {self.port}: {e}")
+            return None
 
     def parse_serial_data(self,data_string):
         elements = data_string.split(',')

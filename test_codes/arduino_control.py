@@ -3,7 +3,7 @@ import serial
 import time
 
 # Configure the serial port to which the Arduino is connected
-arduino = serial.Serial('COM6', 9600)  # Change 'COM6' to your Arduino port
+# arduino = serial.Serial('COM6', 9600)  # Change 'COM6' to your Arduino port
 time.sleep(2)  # Give some time for the connection to be established
 
 relay_states = {2: False, 3: False, 4: False,5: False}

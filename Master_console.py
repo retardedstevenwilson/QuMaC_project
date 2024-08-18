@@ -7,8 +7,9 @@ import serial
 import threading
 import time
 import sys
+import os
 
-Q.arduino = serial.Serial('COM6', 9600)  # Change 'COM6' to your Arduino port
+# Q.arduino = serial.Serial('COM6', 9600)  # Change 'COM6' to your Arduino port
 time.sleep(2)  # Give some time for the connection to be established
 
 Q.relay_states = {1: False, 2: False, 3: False, 4: False,
@@ -40,11 +41,15 @@ def toggle_off(relay_no):
     Q.arduino.write(f'1:{relay_no}:1\n'.encode('utf-8'))  # Send '0' to turn relay off
 
 
+def call_macros_script():
+    os.system('python macro_console.py')
+
+
 # Create the main window
 root = tk.Tk()
 root.title("Master Console")
 root.configure(background='brown')
-root.geometry("1960x600")
+root.geometry("1960x800")
 
 
 # First row - Monitors
@@ -165,6 +170,20 @@ button_7_timers.grid(row = 2, column = 6,  padx=10, pady=10)
 button_8_timers = tk.Button(time_toggle_frame, text="Relay 8",
                             command=lambda: Q.timetoggle_relay(button_8, 8,toggletime), width=15, height=5)
 button_8_timers.grid(row = 2, column = 7,  padx=10, pady=10)
+
+
+
+# 4th row - Macros
+macro_bar = ttk.LabelFrame(root, text="Macro scripts")
+macro_bar.grid(row=4, column=0, padx=10, pady=10, columnspan=4, sticky="ew")
+
+
+button_macros = tk.Button(macro_bar, text="macro scripts",
+                            command= call_macros_script, width=15, height=5)
+button_macros.grid(row = 2, column =0,  padx=10, pady=10)
+
+
+
 
 
 
