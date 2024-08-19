@@ -9,29 +9,7 @@ import time
 import atexit
 import numpy as np
 
-
-# def read_from_serial(ser):
-    
-#     if ser.in_waiting > 0:
-#         data = ser.readline().decode('utf-8').strip()
-#         return data
-#     else:
-#         print("NO INPUT")
-#     time.sleep(1)  # Add a delay to avoid constant updating
-
-
-
-
-# # Function to create a serial connection
-# def create_serial_connection(port, baud_rate):
-#     try:
-#         return serial.Serial(port, baud_rate, timeout=1)
-#     except serial.SerialException as e:
-#         print(f"Error opening serial port {port}: {e}")
-#         return None
-
 # Arduino class --------------------------------------------------------
-
 
 class ArduinoConnector:
     def __init__(self, port):
@@ -203,6 +181,7 @@ class pgauge:
         print("final pressure =: ",self.read_last_entry())
         # Close the serial port 
         ser.close()
+
 
 
     
