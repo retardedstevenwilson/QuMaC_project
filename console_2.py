@@ -1,4 +1,4 @@
-import notebook_utils as Q
+import evp_toolkit as Q
 import tkinter as tk
 from tkinter import ttk
 import threading
