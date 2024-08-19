@@ -1,6 +1,4 @@
 from hardconnections import *
-from IPython import embed
-from threading import Timer
 from tqdm import tqdm
 
 
@@ -46,7 +44,7 @@ if t_rem-t_n2_rough > 0:
 else:
     print("Previous process got late. Initiating the next step")
 
-N2_toggle(p_opt=pfinal_N2,duration=3,toggletime=0.1,initial_toggle=1.5)  
+N2_toggle(p_opt=pfinal_N2,duration=3,toggletime=0.2,initial_toggle=1.5)  
 
 t3=time.time()      
 t_rem=total_time - (t3-t0)
