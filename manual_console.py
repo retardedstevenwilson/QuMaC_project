@@ -1,4 +1,4 @@
-import automation_utils_master_console as Q
+import manual_console_tooklit as Q
 import tkinter as tk
 from tkinter import scrolledtext
 from tkinter import PhotoImage
