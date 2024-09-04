@@ -4,7 +4,9 @@ import threading
 import time
 import sys
 import os
-from console_2_hardconnections import *
+from console_2_toolkit import *
+
+
 
 class RedirectText:
     def __init__(self, text_widget):
@@ -23,7 +25,7 @@ class RedirectText:
 root = tk.Tk()
 root.title("Master Console")
 root.configure(background='brown')
-root.geometry("600x400")
+root.geometry("900x500")
 
 # First row - Monitors
 monitor_frame = ttk.LabelFrame(root, text="Monitors", border=10)
@@ -51,6 +53,13 @@ buffervolume.pressurevalue = tk.StringVar()
 loadlock.pressurevalue = tk.StringVar()
 mainchamber.pressurevalue = tk.StringVar()
 
+# DISPLAY
+terminal_output = tk.Text(monitor_frame, height=10, width=80)
+terminal_output.grid(row=3, column=0,columnspan=3, padx=10, pady=10)
+
+
+
+
 # GPT: explanation - Function to update textboxes with the latest value
 def update_monitor_textbox(textbox, serial_conn, latest_value):
     while True:
@@ -58,12 +67,12 @@ def update_monitor_textbox(textbox, serial_conn, latest_value):
             data = serial_conn.readline().decode('utf-8').strip()
             latest_value.set(data)
             textbox.delete("1.0", tk.END)
-            textbox.insert(tk.END, data)
+            pvalues=parse_serial_data(data)
+            textbox.insert(tk.END, pvalues)
 
 def parse_serial_data(data_string):
     elements = data_string.split(',')
     elements = [element.strip() for element in elements]
-    print(elements)
     pressure_value =float(elements[1]) #enter whatever you wanna return. We only want pressure values here
     return pressure_value
 
@@ -99,7 +108,7 @@ if ser3:
 
 
 # 4th row - Macros
-
+# Dropdown menu setup
 
 def print_values():
     data= buffervolume.pressurevalue.get()
@@ -108,34 +117,142 @@ def print_values():
     print("parse:",data_parsed)
     
 
+def create_popup(title, func, defaults):
+    popup = tk.Toplevel()
+    popup.title(title)
 
-def call_macros_script():
-    os.system('python macro_console.py')
+    arg_entries = {}
+    for arg, default in defaults.items():
+        frame = ttk.Frame(popup)
+        frame.pack(fill='x', padx=5, pady=5)
+
+        label = ttk.Label(frame, text=f"{arg}:")
+        label.pack(side='left', padx=5, pady=5)
+
+        entry = ttk.Entry(frame)
+        entry.insert(0, default)
+        entry.pack(fill='x', expand=True)
+        arg_entries[arg] = entry
+
+    def execute():
+        args = {arg: entry.get() for arg, entry in arg_entries.items()}
+        popup.destroy()
+        func(**args)
+
+    button_frame = ttk.Frame(popup)
+    button_frame.pack(fill='x', padx=5, pady=5)
+
+    cancel_button = ttk.Button(button_frame, text="Cancel", command=popup.destroy)
+    cancel_button.pack(side='right', padx=5, pady=5)
+
+    execute_button = ttk.Button(button_frame, text="Execute", command=execute)
+    execute_button.pack(side='right', padx=5, pady=5)
+
+
+
+
+
+# def open_popup(funct):
+#     selected_function = funct
+
+#     # Open a new pop-up window based on the selected function
+#     if selected_function == 'O2 Charge':
+#         create_popup('O2 Charge', O2_buffer_toggle, 
+#                             {'p_opt': 40, 'duration': 10, 'toggletime': 0.1}) # O2_buffer_toggle(p_opt,duration=10,toggletime=0.1):
+    
+#     elif selected_function == 'Function B':
+#         create_popup('Function B', function_b,
+#                             {'arg1': 'hello', 'arg2': 'world'})
+    
+#     elif selected_function == 'Function C':
+#         create_popup('Function C', function_c, 
+#                             {'arg1': 3.14, 'arg2': 2.72})
+
+
+#O2 charging functions
+def O2_buffer_toggle(p_opt,duration=10,toggletime=0.1):
+    p_opt=float(p_opt)
+    duration=float(duration)
+    toggletime=float(toggletime)
+
+    print("Starting O2 toggle")
+    '''inputs: p_opt, duration of logging after each toggle, and toggletime'''
+    p_current= buffervolume.pressurevalue.get()
+    p_current=parse_serial_data(p_current)
+
+    print("p_o2_current = ",p_current)
+    thr=0.1
+    p_max=760
+    if p_current >=p_max:
+        print('ALERT: BUFFER PRESSURE REACHED MAXIMUM')
+    else:
+        count=0    
+        while p_opt-p_current>=thr:
+            arduino.timetoggle_relay(O2_relay,toggletime)
+            print("P_current_bv = ",p_current)
+            print("Toggling. Standby for 5 sec")
+            time.sleep(5)
+            p_current= buffervolume.pressurevalue.get()
+            p_current=parse_serial_data(p_current)
+            count+=1
+            print("Toggle {} completed.".format(count))
+            # time.sleep(5)
+    print("Final buffer presure = {}. Toggling stopped after {} counts".format(p_current,count))
+
+
+def button_o2charge():
+    create_popup('O2 Charge', O2_buffer_toggle, 
+                            {'p_opt': 40, 'duration': 10, 'toggletime': 0.1}) # O2_buffer_toggle(p_opt,duration=10,toggletime=0.1):
+
+
+def button_function_b():
+    create_popup('Function B', function_b,
+                        {'arg1': 'enter', 'arg2': 'something'})
+
+def function_b(arg1, arg2):
+    print(f"Function B called with arg1={arg1}, arg2={arg2}")
+
 
 
 macro_bar = ttk.LabelFrame(root, text="Macro scripts")
 macro_bar.grid(row=4, column=0, padx=10, pady=10, columnspan=4, sticky="ew")
 
-button_macros = tk.Button(macro_bar, text="macro scripts",
-                          command=call_macros_script, width=30, height=5)
-button_macros.grid(row=2, column=0, padx=10, pady=10)
+# button_macros = tk.Button(macro_bar, text="macro scripts",
+#                           command=call_macros_script, width=30, height=5)
+# button_macros.grid(row=2, column=0, padx=10, pady=10)
 
-button_values = tk.Button(macro_bar, text="Immeditate values",
+button_values = tk.Button(macro_bar, text="Immediate values",
                           command=print_values, width=30, height=5)
 button_values.grid(row=2, column=1, padx=10, pady=10)
 
+o2_charge = tk.Button(macro_bar, text="O2 charge",
+                          command=button_o2charge, width=30, height=5)
+o2_charge.grid(row=2, column=2, padx=10, pady=10)
+
+functb_button = tk.Button(macro_bar, text="functb",
+                          command=button_function_b, width=30, height=5)
+functb_button.grid(row=2, column=3, padx=10, pady=10)
 
 
+
+
+
+
+# DISPLAY
 terminal_output = tk.Text(monitor_frame, height=10, width=80)
 terminal_output.grid(row=3, column=0,columnspan=3, padx=10, pady=10)
 
+
 # Redirect stdout to the terminal_output Text widget
-sys.stdout = RedirectText(terminal_output)
+# sys.stdout = RedirectText(terminal_output)
 
 
+def quit(event):
+    root.quit()
 
-# Start the Tkinter main loop
+root.bind('<Control-c>', quit)
 root.mainloop()
+
 
 # Close the serial ports when the program is closed
 for ser in serial_connections:
