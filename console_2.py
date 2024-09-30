@@ -169,6 +169,9 @@ buffer_to_loadlock_relay=2
 N2_relay=3
 O2_relay=4
 loadlock_to_main_relay=5
+relay_states = {1: False, 2: False, 3: False, 4: False}
+
+
 
 buffervolume=pgauge_console(name='buffervolume',port='COM3') #change comport to 5 for madhavi's laptop
 mainchamber=pgauge_console(name='mainchamber',port='COM7')
@@ -367,22 +370,45 @@ functb_button.grid(row=2, column=3, padx=10, pady=10)
 
 
 # Second row - Pump Toggles-------------------------------------------------------------------------------
+
+def button_manual_toggle(button, relay_no):
+    global arduino
+    global relay_states
+    state = relay_states[relay_no]
+    if state== False:
+        arduino.toggle_relay(relay_no, True)
+        button.config(text=f"Relay {relay_no}: ON", bg='green', fg='white',width=15, height=5)
+        print("Relay {}: ON".format(relay_no))
+        time.sleep(0.1) 
+    else:
+        arduino.toggle_relay(relay_no, False)
+        button.config(text=f"Relay {relay_no}: OFF", bg='red', fg='white',width=15, height=5)
+        print("Relay {}: OFF".format(relay_no))
+        time.sleep(0.1) 
+    relay_states[relay_no] = not state
+
 pump_toggle_frame = ttk.LabelFrame(root, text="Toggles")
 pump_toggle_frame.grid(row=5, column=0, padx=10, pady=10, columnspan=4, sticky="ew")
 
 
-# # Create buttons to toggle the relays
-# button_1 = tk.Button(pump_toggle_frame, text="Relay 1: OFF", command=lambda: arduino.toggle_relay(button_1, 1), width=15, height=5)
-# button_1.grid(row = 2, column = 0,  padx=10, pady=10)
+roughing_relay=1
+buffer_to_loadlock_relay=2
+N2_relay=3
+O2_relay=4
 
-# button_2 = tk.Button(pump_toggle_frame, text="Relay 2: OFF", command=lambda: arduino.toggle_relay(button_2, 2), width=15, height=5)
-# button_2.grid(row = 2, column = 1,  padx=10, pady=10)
 
-# button_3 = tk.Button(pump_toggle_frame, text="Relay 3: OFF", command=lambda: arduino.toggle_relay(button_3, 3), width=15, height=5)
-# button_3.grid(row = 2, column = 2,  padx=10, pady=10)
+# Create buttons to toggle the relays
+button_manualtoggle_4_o2 = tk.Button(pump_toggle_frame, text="Relay O2: OFF", command=lambda: button_manual_toggle(button_manualtoggle_4_o2, O2_relay), width=15, height=5)
+button_manualtoggle_4_o2.grid(row = 5, column = 0,  padx=10, pady=10)
 
-# button_4 = tk.Button(pump_toggle_frame, text="Relay 4: OFF", command=lambda: arduino.toggle_relay(button_4, 4), width=15, height=5)
-# button_4.grid(row = 2, column = 3,  padx=10, pady=10)
+button_manualtoggle_3_n2 = tk.Button(pump_toggle_frame, text="Relay N2: OFF", command=lambda: button_manual_toggle(button_manualtoggle_3_n2, N2_relay), width=15, height=5)
+button_manualtoggle_3_n2.grid(row = 5, column = 1,  padx=10, pady=10)
+
+button_manualtoggle_1_roughing = tk.Button(pump_toggle_frame, text="Relay Roughing: OFF", command=lambda: button_manual_toggle(button_manualtoggle_1_roughing, roughing_relay), width=15, height=5)
+button_manualtoggle_1_roughing.grid(row = 5, column = 2,  padx=10, pady=10)
+
+button_manualtoggle_4_buffertoloadlock = tk.Button(pump_toggle_frame, text="Relay BV to LL: OFF", command=lambda: button_manual_toggle(button_manualtoggle_4_buffertoloadlock, buffer_to_loadlock_relay), width=15, height=5)
+button_manualtoggle_4_buffertoloadlock.grid(row = 5, column = 3,  padx=10, pady=10)
 
 
 
